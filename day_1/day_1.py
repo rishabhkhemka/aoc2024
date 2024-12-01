@@ -15,7 +15,7 @@ def read_input(day) -> str:
     return input_data
 
 
-def parse_input() -> list:
+def parse_input():
     input_data = read_input(day).splitlines()
     left = []
     right = []
