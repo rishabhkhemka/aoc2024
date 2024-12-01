@@ -9,14 +9,14 @@ import collections
 day = 1
 
 
-def read_input(day) -> str:
+def read_input() -> str:
     with open("./input_day_{day}.txt".format(day=day), "r") as f:
         input_data = f.read()
     return input_data
 
 
 def parse_input():
-    input_data = read_input(day).splitlines()
+    input_data = read_input().splitlines()
     left = []
     right = []
     for line in input_data:
