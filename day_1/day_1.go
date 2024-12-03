@@ -12,7 +12,7 @@ import (
 var day = 1
 
 func readInput() string {
-	input_file_path := fmt.Sprintf("input_day_1.txt")
+	input_file_path := fmt.Sprintf("input_day_%d.txt", day)
 	f, err := os.ReadFile(input_file_path)
 	if err != nil {
 		log.Fatalf("error reading file: %v", err)
