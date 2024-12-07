@@ -7,6 +7,7 @@ import (
 	"os"
 	"slices"
 	"strings"
+	"sync"
 )
 
 var day = 7
@@ -60,28 +61,58 @@ func main() {
 func solve() {
 	sum1 := new(big.Int)
 	sum2 := new(big.Int)
+	wg1, wg2 := sync.WaitGroup{}, sync.WaitGroup{}
+	sum1chan := make(chan *big.Int, len(equations))
+	sum2chan := make(chan *big.Int, len(equations))
+	wg1.Add(2)
+	go func() {
+		for v := range sum1chan {
+			sum1.Add(sum1, v)
+		}
+		wg1.Done()
+	}()
+
+	go func() {
+		for v := range sum2chan {
+			sum2.Add(sum2, v)
+		}
+		wg1.Done()
+	}()
 	for n, ops := range equations {
+		wg2.Add(2)
 		ops = slices.Clone(ops)
 		slices.Reverse(ops)
 
-		allCombosP1 := tryCombosP1(ops)
-		// fmt.Println(n, ops, allCombosP1)
-		for _, combo := range allCombosP1 {
-			if combo.Cmp(n) == 0 {
-				sum1.Add(sum1, n)
-				break
+		go func() {
+			// part 1
+			defer wg2.Done()
+			allCombosP1 := tryCombosP1(ops)
+			// fmt.Println(n, ops, allCombosP1)
+			for _, combo := range allCombosP1 {
+				if combo.Cmp(n) == 0 {
+					sum1chan <- n
+					break
+				}
 			}
-		}
+		}()
 
-		allCombosP2 := tryCombosP2(ops)
-		// fmt.Println(n, ops, allCombosP2)
-		for _, combo := range allCombosP2 {
-			if combo.Cmp(n) == 0 {
-				sum2.Add(sum2, n)
-				break
+		go func() {
+			// part 2
+			defer wg2.Done()
+			allCombosP2 := tryCombosP2(ops)
+			// fmt.Println(n, ops, allCombosP2)
+			for _, combo := range allCombosP2 {
+				if combo.Cmp(n) == 0 {
+					sum2chan <- n
+					break
+				}
 			}
-		}
+		}()
 	}
+	wg2.Wait()
+	close(sum1chan)
+	close(sum2chan)
+	wg1.Wait()
 	fmt.Println(sum1.String())
 	fmt.Println(sum2.String())
 }
